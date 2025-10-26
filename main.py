@@ -69,7 +69,7 @@ GAMIFICATION_ENABLED = True  # Whether gamification features are enabled
 
 # Initialize Google Sheets API credentials
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-SPREADSHEET_ID = os.getenv('SPREADSHEET_ID', '1wZqjYKyp8WAo93Y1eJl1KlV1kn_8ueUtOwpmCEDDt1g')
+SPREADSHEET_ID = os.getenv('SPREADSHEET_ID', '1yrl2-2OsIMLkMTT0-7tT1bfeEDjkuGKk2SwenY5zKVk')
 
 # Global variable for the Google Sheets service
 service = None
