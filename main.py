@@ -146,7 +146,7 @@ category_map = {
     "Internet": ["internet", "wifi", "broadband", "net", "phone"],
     "House Committee":
     ["committee", "house committee", "hoa", "maintenance fee"],
-    "Maintenance/Improvements":
+    "Maintenance":
     ["maintenance", "improvement", "repair", "fix", "home", "flowers", "flower", "upgrade", "repairs"],
 
     # Daily Living
@@ -166,10 +166,12 @@ category_map = {
     ],
     "Cloths": [ "cloths", "shirt", "pants", "dress", "clothes", "cloth", "tshirt", "t-shirt", "t shirt"
     ],
+    "Pharm": ["Pharm", "pharm", "superpharm" "pharm", "super pharm", "super-pharm", "pharmacy"
+    ],
     "Other (Daily)": [
         "daily living other", "other daily living", "haircut",
         "miscellaneous living", "Other (Daily)", "Other Daily", "other", "cosmetics", "laser",
-        "personal", "gym", "personal care"
+        "personal", "gym", "personal care", "present", "presents"
     ],
 
     # Entertainment and Recreation
@@ -186,7 +188,7 @@ category_map = {
     "Education": ["books", "courses", "education", "school"],
     "Health": [
         "health", "doctor", "medicine", "hospital", "clinic", "checkup",
-        "insurance", "pharm", "superpharm", "super pharm", "super-pharm", "pharmacy",
+        "insurance",
         "medical", "healthcare"
     ],
 
