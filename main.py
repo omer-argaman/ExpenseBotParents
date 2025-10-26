@@ -128,7 +128,8 @@ category_map = {
         "train", "taxi", "bus", "metro", "tram", "cab", "subway", "ride",
         "public", "transport"
     ],
-    "Fuel Toyota": ["fuel", "petrol", "diesel"],
+    "Fuel Toyota": ["Fuel Toyota", "fuel toyota", "diesel"],
+    "Fuel MG": ["Fuel MG", "petrol", "fuel mg"],
     "Parking": ["parking", "garage", "space", "charging", "park"],
     "Other (Trans)": [
         "transportation other", "other transportation", "Other (Trans)",
@@ -163,10 +164,11 @@ category_map = {
         "beer", "wine", "alcohol", "bar", "cocktail", "drink", "vodka",
         "whiskey", "liquor"
     ],
+    "Cloths": [ "cloths", "shirt", "pants", "dress", "clothes", "cloth", "tshirt", "t-shirt", "t shirt"
+    ],
     "Other (Daily)": [
         "daily living other", "other daily living", "haircut",
         "miscellaneous living", "Other (Daily)", "Other Daily", "other", "cosmetics", "laser",
-        "cloths", "shirt", "pants", "dress", "clothes", "cloth", "tshirt", "t-shirt", "t shirt",
         "personal", "gym", "personal care"
     ],
 
