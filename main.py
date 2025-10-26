@@ -128,7 +128,7 @@ category_map = {
         "train", "taxi", "bus", "metro", "tram", "cab", "subway", "ride",
         "public", "transport"
     ],
-    "Fuel": ["fuel", "petrol", "diesel"],
+    "Fuel Toyota": ["fuel", "petrol", "diesel"],
     "Parking": ["parking", "garage", "space", "charging", "park"],
     "Other (Trans)": [
         "transportation other", "other transportation", "Other (Trans)",
@@ -138,7 +138,7 @@ category_map = {
     # Home Expenses
     "Rent": ["rent", "lease", "apartment fee", "monthly payment", "mortgage"],
     "Electricity": ["electricity", "electric", "power", "energy", "bill", "utility"],
-    "Gas/Oil": ["gas", "oil", "heating", "fuel"],
+    "Gas": ["gas", "oil", "heating",],
     "Water":
     ["water", "sewer", "trash", "garbage", "utilities", "waste"],
     "Property Tax": ["Property Tax", "Tax", "Arnona"],
@@ -150,7 +150,7 @@ category_map = {
 
     # Daily Living
     "Groceries":
-    ["groceries", "supermarket", "market", "super", "store", "shopping", "food"],
+    ["groceries", "supermarket", "market", "super", "store", "shopping", "food", "dani" , "danny"],
     "Coffee": [
         "coffee", "latte", "espresso", "cappuccino", "brew", "americano",
         "mocha", "cafe"
@@ -220,9 +220,9 @@ BROAD_CATEGORIES = {
 # Rows where the total BALANCE for each broad category is stored (Column D)
 # IMPORTANT: Double-check these row numbers against your actual Google Sheet template
 BROAD_CATEGORY_TOTAL_ROWS = {
-    "Home": 35,           # Assuming Balance for Home is in D35
+    "Home": 25,           # Assuming Balance for Home is in D35
     "Transportation": 42, # Assuming Balance for Transportation is in D42
-    "Daily Living": 50,   # Assuming Balance for Daily Living is in D50
+    "Daily Living": 65,   # Assuming Balance for Daily Living is in D50
     "Other": 57           # Assuming Balance for Other is in D57
 }
 
