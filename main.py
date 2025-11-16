@@ -124,15 +124,6 @@ if service is None:
 # Category mapping
 category_map = {
 
-
-    # Education and Healthcare
-    "Education": ["books", "courses", "education", "school"],
-    "Health": [
-        "health", "doctor", "medicine", "hospital", "clinic", "checkup",
-        "insurance",
-        "medical", "healthcare"
-    ],
-
     # Personal Categories
     "Mom": ["Mom", "Ilanit", "Business", "Sapakim" ],
     "Dad": ["Hafenix", "Bitoach Leumi", "BLL"],
@@ -203,6 +194,11 @@ category_map = {
         "Haaretz", "News Paper", "News", "newspaper", "Haarets"],
     "Vacation": ["vacation", "holiday", "trip", "travel", "hotel", "flight", "beach", "resort", "Jip Trip",
         "Jeep trip", "Jeep trips"],
+    "Health": [
+        "health", "doctor", "medicine", "hospital", "clinic", "checkup",
+        "insurance",
+        "medical", "healthcare"
+    ],
     "Pharm": ["Pharm", "pharm", "superpharm" "pharm", "super pharm", "super-pharm", "pharmacy"],
     "Beauty": ["Beauty", "Tipuah", "Haircut", "Hair cut", "Ilana", "Nails", "Hair Color", "personal care"],
     "Treatment": ["Treatment", "RINA", "Rina", "pool", "Alon Rosenberg", "Rosenberg", "Tipul"],
