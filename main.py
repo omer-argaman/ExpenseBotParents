@@ -136,7 +136,7 @@ category_map = {
     "Savings": ["Savings", "Saveings", "IBI"],
 
     # Home Expenses
-    "Mortage": ["mortgage"],
+    "Mortgage": ["mortgage", "mortage"],
     "Electricity": ["electricity", "electric", "energy", "utility", "hashmal"],
     "Gas": ["gas", "gas home"],
     "Water":["water", "sewer", "trash", "garbage", "utilities", "waste"],
@@ -171,7 +171,7 @@ category_map = {
         "Clalit Alon", "Clalit Naama", "Siudi Clalit Shahar", "Siudi Clalit Ilanit", "Siudi Clalit Nadav", "Siudi Clalit Omer",
         "Siudi Clalit Alon", "Siudi Clalit Naama" "Siudi Shahar", "Siudi Ilanit", "Siudi Nadav", "Siudi Omer",
         "Siudi Alon", "Siudi Naama", "Siudi"],
-    "Mortgage": ["Mortgage insurance",],
+    "Mortgage Insurance": ["Mortgage insurance",],
     "Health Insurance": ["Health Insurance"],
 
     # Daily Living
@@ -211,6 +211,11 @@ category_map = {
     "Accountant": ["Accountant", "Accounting", "Ziv Shifer", "Ziv"],
     "Other (Business)": ["Other Business", "Other esek", "Esek"],
 
+}
+
+# Normalize common misspellings/aliases to canonical category names used in Sheets
+CATEGORY_CANONICAL_ALIASES = {
+    "mortage": "mortgage",
 }
 
 # Broad Category Definitions mapping main categories to their subcategories
@@ -273,11 +278,35 @@ async def log_expense_to_google_sheets_with_notes(subcategory, amount, original_
             result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=range_to_search).execute()
             values = result.get('values', [])
             row_number = None
+            effective_subcategory = subcategory
+
+            # Build quick lookup from sheet category text -> row index
+            normalized_sheet_categories = {}
             for i, row in enumerate(values):
-                # Check if row is not empty, has a first element, and matches the category
-                if row and row[0] and row[0].strip().lower() == normalized_subcategory:
-                    row_number = i + 1  # Sheets API is 1-indexed
-                    break
+                if row and row[0]:
+                    normalized_sheet_categories[row[0].strip().lower()] = (i + 1, row[0].strip())
+
+            # 1) Exact lookup
+            if normalized_subcategory in normalized_sheet_categories:
+                row_number, effective_subcategory = normalized_sheet_categories[normalized_subcategory]
+            else:
+                # 2) Alias lookup (e.g. mortage -> mortgage)
+                aliased_category = CATEGORY_CANONICAL_ALIASES.get(normalized_subcategory, normalized_subcategory)
+                if aliased_category in normalized_sheet_categories:
+                    row_number, effective_subcategory = normalized_sheet_categories[aliased_category]
+                else:
+                    # 3) Fuzzy lookup against *sheet categories* to handle close typos safely
+                    if normalized_sheet_categories:
+                        best_match, best_score = process.extractOne(
+                            aliased_category,
+                            list(normalized_sheet_categories.keys())
+                        )
+                        if best_score >= 90:
+                            row_number, effective_subcategory = normalized_sheet_categories[best_match]
+                            logger.info(
+                                f"Resolved category '{subcategory}' to sheet category "
+                                f"'{effective_subcategory}' using fuzzy match ({best_score})"
+                            )
         except Exception as find_row_err:
              logger.error(f"Error searching for category '{subcategory}' in {range_to_search}: {find_row_err}", exc_info=True)
              return f"Error searching for category '{subcategory}' in the sheet."
@@ -291,7 +320,7 @@ async def log_expense_to_google_sheets_with_notes(subcategory, amount, original_
             all_cats = ", ".join(list(category_map.keys())[:5]) + "..."
             return f"Error: Category '{subcategory}' not found in sheet.{suggestion}\nAvailable start with: {all_cats}"
 
-        logger.info(f"Found category '{subcategory}' at row {row_number}")
+        logger.info(f"Found category '{effective_subcategory}' at row {row_number}")
 
         # --- Update Amount (Column C) ---
         amount_cell = f"{sheet_name}!C{row_number}"
@@ -417,7 +446,7 @@ async def log_expense_to_google_sheets_with_notes(subcategory, amount, original_
             # Specific logging for note update failure
             logger.error(f"FAILED to update note for {note_cell_range}: {update_note_err}", exc_info=True)
             # Return specific error about note failure, but mention amount success
-            return f"Amount updated successfully, but failed to add the note for '{subcategory}': {update_note_err}"
+            return f"Amount updated successfully, but failed to add the note for '{effective_subcategory}': {update_note_err}"
 
 
         # --- Post-logging actions (History, Notifications, Gamification) ---
@@ -425,7 +454,7 @@ async def log_expense_to_google_sheets_with_notes(subcategory, amount, original_
         # Add to expense history
         expense_entry = {
             "timestamp": timestamp,
-            "category": subcategory,
+            "category": effective_subcategory,
             "amount": amount,
             "text": original_text,
             "row": row_number,
@@ -446,15 +475,15 @@ async def log_expense_to_google_sheets_with_notes(subcategory, amount, original_
 
 
         # Prepare success message
-        emoji = get_category_emoji(subcategory)
-        success_message = f"{emoji} Added ₪{amount:.2f} to *{subcategory}*. New total: *₪{new_amount:,.2f}*" # Added formatting
+        emoji = get_category_emoji(effective_subcategory)
+        success_message = f"{emoji} Added ₪{amount:.2f} to *{effective_subcategory}*. New total: *₪{new_amount:,.2f}*" # Added formatting
 
         # Handle Gamification if available and user_id present
         gamification_message = ""
         if gamification and user_id:
             try:
                 gs = GamificationSystem(user_id)
-                gam_result = gs.log_expense(subcategory, amount) # Log the expense
+                gam_result = gs.log_expense(effective_subcategory, amount) # Log the expense
 
                 # Process achievements
                 if gam_result.get("achievements"):
@@ -1556,30 +1585,30 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             parts = entry.split()
             
             if len(parts) >= 2:
-                # Extract category and amount
                 category_input = parts[0].lower()
                 logger.info(f"Category input: '{category_input}'")
-                
+
+                # Helper: find category by exact keyword match in mapping
+                def match_category_from_keyword(keyword_text):
+                    keyword_text = keyword_text.lower().strip()
+                    for main_category, keywords in category_map.items():
+                        if keyword_text in [kw.lower() for kw in keywords]:
+                            return main_category
+                    return None
+
+                # Case 1: classic "category amount [note]"
                 try:
                     amount = float(parts[1])
                     logger.info(f"Amount: {amount}")
-                    
-                    # Extract note if present
+
                     note = " ".join(parts[2:]) if len(parts) > 2 else ""
                     logger.info(f"Note: '{note}'")
-                    
-                    # Find matching category - check all keywords in lowercase
-                    matching_category = None
-                    for main_category, keywords in category_map.items():
-                        if category_input in [kw.lower() for kw in keywords]:
-                            matching_category = main_category
-                            break
-                    
+
+                    matching_category = match_category_from_keyword(category_input)
+
                     if matching_category:
                         logger.info(f"Found matching category: '{matching_category}'")
                         traditional_parsing_succeeded = True
-                        
-                        # Log the expense and get the response
                         try:
                             logger.info(f"Logging expense: category='{matching_category}', amount={amount}, text='{entry}'")
                             result = await log_expense_to_google_sheets_with_notes(matching_category, amount, entry, user_id)
@@ -1590,27 +1619,57 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                             await update.message.reply_text(f"Error logging expense: {str(e)}")
                     else:
                         logger.info(f"No matching category found for '{category_input}', trying fuzzy matching")
-                        
                         try:
-                            # Store expense details for later use if suggestion is accepted
                             if not hasattr(context, 'user_data'):
                                 context.user_data = {}
-                            
+
                             context.user_data['amount'] = amount
                             context.user_data['note'] = note
                             context.user_data['original_text'] = entry
                             context.user_data['user_id'] = user_id
-                            
-                            # Try to suggest similar categories
+
                             suggestion_result = await handle_category_suggestion(update, context, category_input)
                             logger.info(f"Category suggestion result: {suggestion_result}")
-                            traditional_parsing_succeeded = True  # We're handling this with fuzzy matching
+                            traditional_parsing_succeeded = True
                         except Exception as e:
                             logger.error(f"Error suggesting category: {str(e)}", exc_info=True)
                             traditional_parsing_succeeded = False
+
                 except ValueError:
-                    logger.warning(f"Invalid amount in entry: '{entry}'")
-                    traditional_parsing_succeeded = False
+                    # Case 2: second token is NOT amount.
+                    # Try "two-word category amount [note]" (e.g., "Mortgage insurance 1052")
+                    logger.info(f"Second token is not numeric for entry '{entry}', trying two-word category parse")
+
+                    if len(parts) >= 3:
+                        two_word_category_input = f"{parts[0]} {parts[1]}".lower()
+                        logger.info(f"Trying two-word category input: '{two_word_category_input}'")
+
+                        try:
+                            amount = float(parts[2])
+                            note = " ".join(parts[3:]) if len(parts) > 3 else ""
+                            matching_category = match_category_from_keyword(two_word_category_input)
+
+                            if matching_category:
+                                logger.info(f"Found matching category from two-word keyword: '{matching_category}'")
+                                traditional_parsing_succeeded = True
+                                try:
+                                    logger.info(f"Logging expense: category='{matching_category}', amount={amount}, text='{entry}'")
+                                    result = await log_expense_to_google_sheets_with_notes(matching_category, amount, entry, user_id)
+                                    logger.info(f"Expense logged with result: '{result}'")
+                                    await update.message.reply_text(result)
+                                except Exception as e:
+                                    logger.error(f"Error logging expense: {str(e)}", exc_info=True)
+                                    await update.message.reply_text(f"Error logging expense: {str(e)}")
+                            else:
+                                # If two-word direct match fails, keep existing NLP fallback behavior.
+                                logger.info(f"No mapping match found for two-word keyword '{two_word_category_input}'")
+                                traditional_parsing_succeeded = False
+                        except ValueError:
+                            logger.warning(f"Third token is also not numeric in entry: '{entry}'")
+                            traditional_parsing_succeeded = False
+                    else:
+                        logger.warning(f"Not enough tokens for two-word category parsing in entry: '{entry}'")
+                        traditional_parsing_succeeded = False
             else:
                 logger.warning(f"Not enough parts in entry: '{entry}'")
                 traditional_parsing_succeeded = False
