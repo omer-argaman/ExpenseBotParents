@@ -163,7 +163,7 @@ category_map = {
     "Other (Trans)": ["transportation other", "other transportation", "Other (Trans)",
         "Other Trans", "Other Transportation"],
     
-    #Insurance
+    #Insurances
     "Life": ["life insurance", "life insurance Dad", "life insurance Mom", "life insurance Risk",],
     "Nursing": ["Nursing insurance", "Nursing",],
     "Structure": ["Structure insurance", "Structure"],
