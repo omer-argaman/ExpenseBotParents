@@ -136,7 +136,7 @@ category_map = {
     "Savings": ["Savings", "Saveings", "IBI"],
 
     # Home Expenses
-    "Mortgage": ["mortgage", "mortage"],
+    "Mortgage Payment": ["mortgage", "mortage"],
     "Electricity": ["electricity", "electric", "energy", "utility", "hashmal"],
     "Gas": ["gas", "gas home"],
     "Water":["water", "sewer", "trash", "garbage", "utilities", "waste"],
@@ -171,7 +171,7 @@ category_map = {
         "Clalit Alon", "Clalit Naama", "Siudi Clalit Shahar", "Siudi Clalit Ilanit", "Siudi Clalit Nadav", "Siudi Clalit Omer",
         "Siudi Clalit Alon", "Siudi Clalit Naama" "Siudi Shahar", "Siudi Ilanit", "Siudi Nadav", "Siudi Omer",
         "Siudi Alon", "Siudi Naama", "Siudi"],
-    "Mortgage Insurance": ["Mortgage insurance",],
+    "Mortgage insurance": ["Mortgage insurance",],
     "Health Insurance": ["Health Insurance"],
 
     # Daily Living
